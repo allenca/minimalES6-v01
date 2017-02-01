@@ -8,7 +8,7 @@ export default class CatalogView{
 
     constructor(){
         this.initCarousel();
-
+        this.theApp = null; // add to bring this data container in and set to nothing
     }
 
     initCarousel(){
@@ -26,8 +26,23 @@ export default class CatalogView{
 
         this.carousel = document.getElementsByClassName("container");
     }
+    
+    onClickCartButton(theApp){
+        return function(e){
+        console.log(e.target.getAttribute("data-sku")); // easy way or console.log(e.target["data-sku"]);
+        // get the value of data sku
+        // now prepare the value and pass it to shopping cart
+        let theSku = e.target.getAttribute("data-sku");
+        theApp.shoppingCart.addItemToCart(theSku);
+        //this file has theApp property which we assigned to be theApp, it has a shopping cart,
+        //shopping cart.js has a function called addItemToCart that you need to create
+        }
+    }
 
-    addProductsToCarousel(products){
+    addProductsToCarousel(products,theApp){
+        // added theApp object data to be brought in to this class
+        
+        this.theApp = theApp; // now CatalogView is aware of the data in theApp
 
         if (products === undefined || products == null){
             return ; // do not do anything! there is no data
@@ -47,10 +62,13 @@ export default class CatalogView{
             console.log(product);
             // each product is a product object
             // use it to create the element
+            // p for products, could be called anything ex. counter
+            // products[p], product at position p, brings up the product at that position
 
             // create the DIV tag with class 'product-wrapper'
             let newDiv = document.createElement("div");
             newDiv.setAttribute("class","product-wrapper");
+            // <div class ="product wrapper"</div>
 
             // create a new IMG tag. Suggest to add data-sku attribute here too
             // so that if you 'click' on the image, it would pop up a quick-view
@@ -58,23 +76,26 @@ export default class CatalogView{
             let newImg = document.createElement("img");
             newImg.setAttribute("src", product.image);
             newImg.setAttribute("alt", `${product.name}`); // this works too
-            newImg.setAttribute("data-sku",product.sku);
+            newImg.setAttribute("data-sku",product.sku); // this was his hint
 
             // create a new Paragraph to show a description
             let newPara = document.createElement("p");
             newPara.setAttribute("class","product-type");
             let newParaTextNode = document.createTextNode(product.longDescription);
             newPara.appendChild(newParaTextNode);
+            // <p class="product-type">some text for product type</p>
 
             // create a new H3 tag to show the name
             let newH3Tag = document.createElement("h3");
             let newH3TagTextNode = document.createTextNode(product.name);
             newH3Tag.appendChild(newH3TagTextNode);
+            // <h3>Dell Inspirion 12" blah blah</h3>
 
             let newPricePara = document.createElement("p");
             newPricePara.setAttribute("class","price");
             let newPriceParaTextNode = document.createTextNode(product.regularPrice);
             newPricePara.appendChild(newPriceParaTextNode);
+            // <p class="price">299.99</p>
 
             /* you will need similar code to create
             an add to cart and a quick view button
@@ -83,11 +104,49 @@ export default class CatalogView{
             of each product.
             */
 
+            let quickViewButton = document.createElement("button");
+            quickViewButton.setAttribute("id",`qv_${product.sku}`); // for id
+            // setting the id to be qv_whatever the sku number is
+            quickViewButton.setAttribute("data-sku",product.sku); // for data sku
+            quickViewButton.setAttribute("type","button");
+            let quickViewTextNode = document.createTextNode("Quick View");
+            quickViewButton.appendChild(quickViewTextNode);
+            // this whole thing creates the first whole button
+            
+            let addToCartButton = document.createElement("button");
+            addToCartButton.setAttribute("id",`cart_${product.sku}`);
+            addToCartButton.setAttribute("data-sku",product.sku);
+            addToCartButton.setAttribute("type","button");
+            let addToCartTextNode = document.createTextNode("Add To Cart");
+            addToCartButton.appendChild(addToCartTextNode);
+            addToCartButton.addEventListener("click",this.onClickCartButton(this.theApp),false); // added on click event, bring theapp data into this class
+
             newDiv.appendChild(newImg);
             newDiv.appendChild(newPara);
             newDiv.appendChild(newH3Tag);
             newDiv.appendChild(newPricePara);
+            newDiv.appendChild(quickViewButton); // added new quickView Button
+            newDiv.appendChild(addToCartButton); // added add To Cart Button
+            // produces:
+            // <div>
+            //   <img src="somepicfrombestbuy"></img>
+            //   <p>buy me now</p>
+            //   <h3>Dell Inspirion 12"</h3>
+            //   <p>299.99</p>
+            //   <button>Quick View</button>
+            //   <button>Add to Cart</button>
+            // </div>
+            // 
+            // sketch out the buttons for the quick view, ex:
+            // <button id="qv_${product.sku}" data-sku="" type="button">Quick View</button>
+            // <button id="cart_${product.sku}" data-sku="" type="button"><Add to Cart</button>
+            // does the button id have to be the data sku? no, but would be easy
+            // just identifies which button is for quick view and one is for cart
+             
             this.carousel[0].appendChild(newDiv);
+            // refers to the first carousel, because class name might refer to more than one carousel
+            // do this to identify even if there's only one carousel
+            // if you had a div id for the carousel, don't need to worry about this
         }
 
     }

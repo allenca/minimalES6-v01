@@ -42,8 +42,9 @@ export default class BestBuyWebService{
             thisService.results(evt,theApp)
         };
         return eventHandler
+        // eventHandler is the function object
     };
-
+    
     results(evt,theApp){
 
         if (evt.target.readyState == 4 && evt.target.status == 200){
